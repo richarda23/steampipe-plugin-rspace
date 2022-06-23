@@ -13,6 +13,7 @@ import (
 const (
 	APIKEY_ENV_NAME   = "RSPACE_API_KEY"
 	BASE_URL_ENV_NAME = "RSPACE_URL"
+	HARD_LIMIT        = 1000
 )
 
 func tableRSpaceEventListKeyColumns() []*plugin.KeyColumn {
@@ -56,19 +57,36 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		val := equalQuals["domain"].GetStringValue()
 		builder.Domain(val)
 	}
+	if equalQuals["action"] != nil {
+		val := equalQuals["action"].GetStringValue()
+		builder.Action(val)
 
-	q, _ := builder.Build()
+	}
 
-	cfg := rspace.NewRecordListingConfig()
-	cfg.PageSize = 100
-	docList, err := conn.Activities(q, cfg)
+	q, err := builder.Build()
 	if err != nil {
 		return nil, err
 	}
-	logger.Warn("There are " + strconv.Itoa(len(docList.Activities)) + " activities")
 
-	for _, t := range docList.Activities {
-		d.StreamListItem(ctx, t)
+	cfg := rspace.NewRecordListingConfig()
+
+	cfg.PageSize = 100
+	for true {
+		docList, err := conn.Activities(q, cfg)
+		if err != nil {
+			return nil, err
+		}
+		logger.Warn("There are " + strconv.Itoa(len(docList.Activities)) + " activities")
+		for _, t := range docList.Activities {
+			d.StreamListItem(ctx, t)
+		}
+		links := docList.Links
+		if listingHasNextPage(links) && cfg.PageNumber*cfg.PageSize < HARD_LIMIT {
+			cfg.PageNumber = cfg.PageNumber + 1
+		} else {
+			break
+		}
+
 	}
 	return nil, nil
 }
