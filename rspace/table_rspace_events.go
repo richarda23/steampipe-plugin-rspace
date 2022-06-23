@@ -15,12 +15,21 @@ const (
 	BASE_URL_ENV_NAME = "RSPACE_URL"
 )
 
+func tableRSpaceEventListKeyColumns() []*plugin.KeyColumn {
+	return []*plugin.KeyColumn{
+		{Name: "domain", Require: plugin.Optional},
+		{Name: "action", Require: plugin.Optional},
+		{Name: "timestamp", Operators: []string{">", ">=", "=", "<", "<="}, Require: plugin.Optional},
+	}
+}
+
 func tableRSpaceEvent() *plugin.Table {
 	return &plugin.Table{
 		Name:        "rspace_event",
 		Description: "RSpace events listing",
 		List: &plugin.ListConfig{
-			Hydrate: listEvent,
+			Hydrate:    listEvent,
+			KeyColumns: tableRSpaceEventListKeyColumns(),
 		},
 		Columns: []*plugin.Column{
 			{Name: "username", Type: proto.ColumnType_STRING, Description: "Username of person who performed event"},
@@ -41,6 +50,13 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		return nil, err
 	}
 	builder := rspace.ActivityQueryBuilder{}
+	equalQuals := d.KeyColumnQuals
+
+	if equalQuals["domain"] != nil {
+		val := equalQuals["domain"].GetStringValue()
+		builder.Domain(val)
+	}
+
 	q, _ := builder.Build()
 
 	cfg := rspace.NewRecordListingConfig()
@@ -50,6 +66,7 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		return nil, err
 	}
 	logger.Warn("There are " + strconv.Itoa(len(docList.Activities)) + " activities")
+
 	for _, t := range docList.Activities {
 		d.StreamListItem(ctx, t)
 	}
