@@ -2,17 +2,12 @@ package rspace
 
 import (
 	"context"
-	"errors"
-
-	"net/url"
-	"os"
 	"strconv"
-	"strings"
 
 	"github.com/richarda23/rspace-client-go/rspace"
-
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
+	"github.com/turbot/steampipe-plugin-sdk/plugin/transform"
 )
 
 const (
@@ -29,6 +24,7 @@ func tableRSpaceEvent() *plugin.Table {
 		},
 		Columns: []*plugin.Column{
 			{Name: "username", Type: proto.ColumnType_STRING, Description: "Username of person who performed event"},
+			{Name: "full_name", Transform: transform.FromCamel(), Type: proto.ColumnType_STRING, Description: "Full name of person who performed event"},
 			{Name: "domain", Type: proto.ColumnType_STRING, Description: "Event domain"},
 			{Name: "action", Type: proto.ColumnType_STRING, Description: "Event action"},
 			{Name: "timestamp", Type: proto.ColumnType_TIMESTAMP, Description: "Timestamp of event"},
@@ -36,39 +32,11 @@ func tableRSpaceEvent() *plugin.Table {
 		},
 	}
 }
-func connect(ctx context.Context) (*rspace.RsWebClient, error) {
-	logger := plugin.Logger(ctx)
-	logger.Warn("Querying events API")
-	url, e := parseUrl(getenv(BASE_URL_ENV_NAME))
-	if e != nil {
-		return nil, e
-	}
-	apikey := getenv(APIKEY_ENV_NAME)
-	if apikey == "" || url == nil {
-		return nil, errors.New("API key and/ or URL is not defined")
-	}
-	webClient := rspace.NewWebClientCustomTimeout(url, apikey, 30)
-	return webClient, nil
-}
-
-func parseUrl(urlStr string) (*url.URL, error) {
-	var canonicalUrl string = urlStr
-	if !strings.HasSuffix(urlStr, "/api/v1") {
-		if !strings.HasSuffix(urlStr, "/") {
-			canonicalUrl = urlStr + "/"
-
-		}
-		canonicalUrl = urlStr + "api/v1"
-	}
-	apiUrl, err := url.Parse(canonicalUrl)
-	return apiUrl, err
-}
 
 func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
 	logger := plugin.Logger(ctx)
 	conn, err := connect(ctx)
 	if err != nil {
-
 		logger.Warn("couldn't connect to RSpace")
 		return nil, err
 	}
@@ -86,8 +54,4 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		d.StreamListItem(ctx, t)
 	}
 	return nil, nil
-}
-
-func getenv(envname string) string {
-	return os.Getenv(envname)
 }
