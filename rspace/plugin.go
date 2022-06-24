@@ -12,7 +12,8 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		Name:             "steampipe-plugin-rspace",
 		DefaultTransform: transform.FromGo().NullIfZero(),
 		TableMap: map[string]*plugin.Table{
-			"rspace_event": tableRSpaceEvent(),
+			"rspace_event":    tableRSpaceEvent(),
+			"rspace_document": tableRSpaceDocument(),
 		},
 	}
 	return p

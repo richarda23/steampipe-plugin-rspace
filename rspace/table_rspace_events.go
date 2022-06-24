@@ -11,9 +11,7 @@ import (
 )
 
 const (
-	APIKEY_ENV_NAME   = "RSPACE_API_KEY"
-	BASE_URL_ENV_NAME = "RSPACE_URL"
-	HARD_LIMIT        = 1000
+	HARD_LIMIT = 1000
 )
 
 func tableRSpaceEventListKeyColumns() []*plugin.KeyColumn {
