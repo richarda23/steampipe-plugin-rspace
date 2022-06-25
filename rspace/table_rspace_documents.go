@@ -53,12 +53,14 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	if equalQuals["name"] != nil {
 		val := equalQuals["name"].GetStringValue()
 		builder.AddTerm(val, rspace.NAME)
-		//return nil, errors.New(val)
 	}
 	if equalQuals["tags"] != nil {
 		val := equalQuals["tags"].GetStringValue()
 		builder.AddTerm(val, rspace.TAG)
-		//return nil, errors.New(val)
+	}
+	if equalQuals["owner_username"] != nil {
+		val := equalQuals["owner_username"].GetStringValue()
+		builder.AddTerm(val, rspace.OWNER)
 	}
 
 	q := builder.Build()
@@ -76,7 +78,7 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 		logger.Warn("There are " + strconv.Itoa(len(docList.Documents)) + " documents")
 		for _, t := range docList.Documents {
-			logger.Warn(fmt.Sprintf("id=%s and name =%s", t.GlobalId, t.Name))
+			logger.Warn(fmt.Sprintf("id=%s and name=%s", t.GlobalId, t.Name))
 		}
 		for _, t := range docList.Documents {
 			mappedDoc := SPDocInfo{t.GlobalId, t.Name, t.UserInfo.Username, t.Tags}
@@ -90,5 +92,6 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		}
 
 	}
+	transform.FromField("name")
 	return nil, nil
 }
