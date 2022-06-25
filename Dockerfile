@@ -25,7 +25,7 @@ USER root
 ## checkout the dashboard
 RUN apt-get update && apt-get -y install git
 WORKDIR /git
-RUN git clone --depth 1 https://github.com/richarda23/steampipe-mod-rspace.git
+RUN git clone --depth 1 -bv0.0.1 https://github.com/richarda23/steampipe-mod-rspace.git
 RUN chown -R steampipe /git
 
 USER steampipe
