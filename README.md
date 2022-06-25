@@ -1,6 +1,7 @@
-Steampipe plugin for RSpace ELN
+Steampipe plugin for [RSpace ELN](https://www.researchspace.com)
 
-This plugin provides some access to RSpave resources via the activity/ and documents/ API using  [Steampipe](https://steampipe.io) 
+This plugin provides some access to RSpave resources via the activity/ and documents/ API using  [Steampipe](https://steampipe.io). It's a prototype dashboard that can show various metrics about RSapace activity. It also supports the notions of 'controls' that can
+provided alerts or warnings about good practices.
 
 A Docker image with embedded RSpace dashboard is available:
 
@@ -13,7 +14,7 @@ Set an API key and URL for your RSpace in environment variables, e.g.
     export RSPACE_API_KEY="abcdefg"
     export RSPACE_URL=https://path/to/yourRSpace/
 
-Note the trailing / is required on the URL.
+Note the trailing '/' is required on the URL.
 
 ### Basic command to launch dashboard
 
@@ -23,12 +24,12 @@ To run the dashboard:
 
 And open your browser at http://localhost:9194/local.dashboard.rspace_dashboard
 
-You should see a dashboard illustrating some stats about RSpace activity. The 'Untitled documents' benchmark can take some time to load.
+You should see a dashboard illustrating some stats about RSpace activity. There is an  'Untitled documents' benchmark which lists documents with no name. Having too many untitled documents can make it hard to find or search for content.
 
 ![docs/RSpaceDashboard.png](docs/RSpaceDashboard.png)
 
 The Dashboard can show charts, tables and alerts.
-The above command will stop remove the Docker container when you stop it using Ctrl-C.
+The above command will remove the Docker container when you stop it using Ctrl-C.
 
 ### Running queries
 
@@ -50,6 +51,8 @@ You can pass in a query on the command line and specify an output format (csv or
 
     docker exec -it rspace-dashboard steampipe query\
      "select timestamp, payload->>'name' as name, payload ->>'id' as id from rspace_event where domain='RECORD' and action='CREATE'" --output csv
+
+### Modifying the dashboard
 
 Please suggest any information you'd like to see in the dashboard. 
 
