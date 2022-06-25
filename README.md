@@ -54,6 +54,30 @@ You can pass in a query on the command line and specify an output format (csv or
 
 ### Modifying the dashboard
 
+There are 2 ways you can access the configuration files that generate the dashboard widgets. Both have identical results. Choose whatever you are most comfortable with. After saving the file, the dashboard automatically updates.
+
+Refer to the [Steampipe docs](https://steampipe.io/docs/mods/writing-dashboards) on how to declare dashboards and controls
+
+#### 1. Modifying the file inside Docker container
+
+You can access the container via
+
+    docker exec -it rspace-dashboard /bin/bash
+
+ vim and nano editors are installed to edit the `control_events.sp` and `rspace_dashboard.sp` files.
+
+    docker exec -it rspace-dashboard /bin/bash
+
+#### 2. Mounting the dashboard files directly into the container
+
+Alternatively, you can pull the dashboard project from Github
+
+    git clone --depth 1 -bv0.0.1 https://github.com/richarda23/steampipe-mod-rspace.git
+
+You can them mount the clone reop inside the Docker container, and edit it with any editor you have installed on your computer. Change the 'src' attribute in the command below to match the location of the cloned repo on your  system.
+ 
+    docker run -d  --name rspace-dashboard -p9194:9194 -eRSPACE_API_KEY -e RSPACE_URL --mount type=bind,src=/absolute/path/to/cloned/gitrepo/steampipe-mod-rspace,dst=/git/mod-rspace otter606/rspace-steampipe:0.0.1
+
 Please suggest any information you'd like to see in the dashboard. 
 
     
