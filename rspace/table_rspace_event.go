@@ -2,6 +2,7 @@ package rspace
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/richarda23/rspace-client-go/rspace"
@@ -67,6 +68,10 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	}
 
 	cfg := rspace.NewRecordListingConfig()
+	lim := d.QueryContext.Limit
+
+	page_sizes, _ := calculatePageSizes(*lim, HARD_LIMIT, 100)
+	fmt.Println(page_sizes)
 
 	cfg.PageSize = 100
 	for true {

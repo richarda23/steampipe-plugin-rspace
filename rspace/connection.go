@@ -52,13 +52,3 @@ func connect(ctx context.Context) (*rspace.RsWebClient, error) {
 	webClient := rspace.NewWebClientCustomTimeout(url, apikey, 30)
 	return webClient, nil
 }
-
-func listingHasNextPage(links []rspace.Link) bool {
-	for _, v := range links {
-
-		if v.Rel == "next" {
-			return true
-		}
-	}
-	return false
-}
