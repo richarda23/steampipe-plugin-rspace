@@ -2,7 +2,6 @@ package rspace
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/richarda23/rspace-client-go/rspace"
@@ -51,7 +50,7 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	}
 	builder := rspace.ActivityQueryBuilder{}
 	equalQuals := d.KeyColumnQuals
-
+	logger.Warn("", "equalQuals", equalQuals)
 	if equalQuals["domain"] != nil {
 		val := equalQuals["domain"].GetStringValue()
 		builder.Domain(val)
@@ -66,29 +65,42 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	if err != nil {
 		return nil, err
 	}
+	logger.Warn("", "apiquery", q)
 
 	cfg := rspace.NewRecordListingConfig()
-	lim := d.QueryContext.Limit
 
-	page_sizes, _ := calculatePageSizes(*lim, HARD_LIMIT, 100)
-	fmt.Println(page_sizes)
-
-	cfg.PageSize = 100
-	for true {
+	limit := HARD_LIMIT
+	if d != nil && d.QueryContext != nil && d.QueryContext.Limit != nil {
+		lim := d.QueryContext.Limit
+		if *lim > 0 && *lim < HARD_LIMIT {
+			limit = int(*lim)
+		}
+	}
+	logger.Warn("Limit is :", "limit", limit)
+	page_sizes, _ := calculatePageSizes(limit, HARD_LIMIT, 100)
+	logger.Warn("", "page_sizes", page_sizes)
+	if err != nil {
+		return nil, err
+	}
+	currPage := 0
+	for i, v := range page_sizes {
+		cfg.PageSize = v
+		logger.Info("Retrieving pages", "page", i, "pageSize", v)
 		docList, err := conn.Activities(q, cfg)
 		if err != nil {
 			return nil, err
 		}
-		logger.Warn("There are " + strconv.Itoa(len(docList.Activities)) + " activities")
+		logger.Warn("Found activities", "total", strconv.Itoa(len(docList.Activities)))
 		for _, t := range docList.Activities {
 			d.StreamListItem(ctx, t)
 		}
 		links := docList.Links
-		if listingHasNextPage(links) && cfg.PageNumber*cfg.PageSize < HARD_LIMIT {
+		if listingHasNextPage(links) {
 			cfg.PageNumber = cfg.PageNumber + 1
 		} else {
 			break
 		}
+		currPage++
 
 	}
 	return nil, nil

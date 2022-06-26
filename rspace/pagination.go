@@ -18,13 +18,14 @@ func listingHasNextPage(links []rspace.Link) bool {
 }
 
 // calculatePageSizes calculates a list of pagesizes to use given a SQL limit and
-func calculatePageSizes(lim int64, HARD_LIMIT int, maxPageSize int) ([]int, error) {
+func calculatePageSizes(lim int, HARD_LIMIT int, maxPageSize int) ([]int, error) {
+
 	if lim < 1 || HARD_LIMIT < 1 || maxPageSize < 1 {
 		return nil, errors.New(fmt.Sprintf("Invalid arguments: must be positive integers > 1 - %d, %d ,%d", lim, HARD_LIMIT, maxPageSize))
 	}
-	if lim < int64(maxPageSize) {
+	if lim < maxPageSize {
 		return []int{int(lim)}, nil
-	} else if lim > int64(HARD_LIMIT) {
+	} else if lim > HARD_LIMIT {
 		len := HARD_LIMIT / maxPageSize
 		pageSizes := make([]int, len)
 		for i := 0; i < len; i += 1 {
@@ -32,15 +33,23 @@ func calculatePageSizes(lim int64, HARD_LIMIT int, maxPageSize int) ([]int, erro
 		}
 		return pageSizes, nil
 	} else {
-		num_items := (int(lim) / maxPageSize)
-		final_page_size := int(lim) % maxPageSize
+		add_remainder_page := 0
+		limInt := int(lim)
+		remainder := limInt % maxPageSize
+		if remainder > 0 {
+			add_remainder_page = 1
+		}
+		num_items := (limInt / maxPageSize) + add_remainder_page
+		final_page_size := remainder
 		pageSizes := make([]int, num_items)
-		for i := 0; i < num_items-1; i += 1 {
+		for i := 0; i < num_items-add_remainder_page; i += 1 {
 			pageSizes[i] = maxPageSize
 		}
-		pageSizes[num_items-1] = final_page_size
-		return pageSizes, nil
+		if remainder > 0 {
+			pageSizes[num_items-1] = final_page_size
 
+		}
+		return pageSizes, nil
 	}
 
 }
