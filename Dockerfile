@@ -30,15 +30,10 @@ COPY --from=builder --chown=steampipe:0 /$STEAMPIPE_PLUGIN_RSPACE ${STEAMPIPE_PL
 ## checkout the dashboard
 RUN apt-get update && apt-get -y install git vim nano
 WORKDIR /git
-RUN git clone --depth 1 -bv0.0.1 https://github.com/richarda23/steampipe-mod-rspace.git
+RUN git clone --depth 1 -bv0.0.2 https://github.com/richarda23/steampipe-mod-rspace.git
 RUN chown -R steampipe /git
 
 USER steampipe
 WORKDIR /git/steampipe-mod-rspace
 
 CMD ["steampipe", "service", "start", "--foreground", "--dashboard", "--dashboard-listen=network"]
-
-
-
-
-
