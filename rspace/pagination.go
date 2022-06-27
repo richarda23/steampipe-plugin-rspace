@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/richarda23/rspace-client-go/rspace"
+	"github.com/turbot/steampipe-plugin-sdk/plugin"
 )
 
 func listingHasNextPage(links []rspace.Link) bool {
@@ -17,7 +18,7 @@ func listingHasNextPage(links []rspace.Link) bool {
 	return false
 }
 
-// calculatePageSizes calculates a list of pagesizes to use given a SQL limit and
+// calculatePageSizes calculates a list of pagesizes to use given a SQL limit
 func calculatePageSizes(lim int, HARD_LIMIT int, maxPageSize int) ([]int, error) {
 
 	if lim < 1 || HARD_LIMIT < 1 || maxPageSize < 1 {
@@ -52,4 +53,16 @@ func calculatePageSizes(lim int, HARD_LIMIT int, maxPageSize int) ([]int, error)
 		return pageSizes, nil
 	}
 
+}
+
+// getLimit extracts the  limit specifed in the database query, or returns HARD_LIMIT
+func getLimit(d *plugin.QueryData) int {
+	limit := HARD_LIMIT
+	if d != nil && d.QueryContext != nil && d.QueryContext.Limit != nil {
+		lim := d.QueryContext.Limit
+		if *lim > 0 && *lim < HARD_LIMIT {
+			limit = int(*lim)
+		}
+	}
+	return limit
 }

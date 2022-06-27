@@ -48,19 +48,7 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		logger.Warn("couldn't connect to RSpace")
 		return nil, err
 	}
-	builder := rspace.ActivityQueryBuilder{}
-	equalQuals := d.KeyColumnQuals
-	logger.Warn("", "equalQuals", equalQuals)
-	if equalQuals["domain"] != nil {
-		val := equalQuals["domain"].GetStringValue()
-		builder.Domain(val)
-	}
-	if equalQuals["action"] != nil {
-		val := equalQuals["action"].GetStringValue()
-		builder.Action(val)
-	}
-
-	q, err := builder.Build()
+	q, err := buildDocQuery(d)
 	if err != nil {
 		return nil, err
 	}
@@ -68,20 +56,14 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 
 	cfg := rspace.NewRecordListingConfig()
 
-	limit := HARD_LIMIT
-	if d != nil && d.QueryContext != nil && d.QueryContext.Limit != nil {
-		lim := d.QueryContext.Limit
-		if *lim > 0 && *lim < HARD_LIMIT {
-			limit = int(*lim)
-		}
-	}
+	limit := getLimit(d)
 	logger.Warn("Limit is :", "limit", limit)
 	page_sizes, _ := calculatePageSizes(limit, HARD_LIMIT, 100)
 	logger.Warn("", "page_sizes", page_sizes)
 	if err != nil {
 		return nil, err
 	}
-	currPage := 0
+
 	for i, v := range page_sizes {
 		cfg.PageSize = v
 		logger.Info("Retrieving pages", "page", i, "pageSize", v)
@@ -99,8 +81,22 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		} else {
 			break
 		}
-		currPage++
-
 	}
 	return nil, nil
+}
+
+func buildDocQuery(d *plugin.QueryData) (*rspace.ActivityQuery, error) {
+	builder := rspace.ActivityQueryBuilder{}
+	equalQuals := d.KeyColumnQuals
+	if equalQuals["domain"] != nil {
+		val := equalQuals["domain"].GetStringValue()
+		builder.Domain(val)
+	}
+	if equalQuals["action"] != nil {
+		val := equalQuals["action"].GetStringValue()
+		builder.Action(val)
+	}
+
+	q, err := builder.Build()
+	return q, err
 }
