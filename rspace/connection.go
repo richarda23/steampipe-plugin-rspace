@@ -3,7 +3,6 @@ package rspace
 import (
 	"context"
 	"errors"
-	"io"
 	"net/url"
 	"os"
 	"strings"
@@ -20,21 +19,13 @@ func getenv(envname string) string {
 	return os.Getenv(envname)
 }
 
-func doio(bytes []byte) string {
-	r := strings.NewReader("Go is a general-purpose language designed with systems programming in mind.")
-	b, _ := io.ReadAll(r)
-
-	return string(b)
-}
-
 func parseUrl(urlStr string) (*url.URL, error) {
 	var canonicalUrl string = urlStr
 	if !strings.HasSuffix(urlStr, "/api/v1") {
 		if !strings.HasSuffix(urlStr, "/") {
 			canonicalUrl = urlStr + "/"
-
 		}
-		canonicalUrl = urlStr + "api/v1"
+		canonicalUrl = canonicalUrl + "api/v1"
 	}
 	apiUrl, err := url.Parse(canonicalUrl)
 	return apiUrl, err

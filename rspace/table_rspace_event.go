@@ -58,7 +58,6 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	if equalQuals["action"] != nil {
 		val := equalQuals["action"].GetStringValue()
 		builder.Action(val)
-
 	}
 
 	q, err := builder.Build()
