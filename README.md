@@ -19,7 +19,7 @@ Set an API key and URL for your RSpace in environment variables, e.g.
 
 To run the dashboard:
 
-    docker run --rm  --name rspace-dashboard -p9194:9194 -eRSPACE_API_KEY -e RSPACE_URL otter606/rspace-steampipe:0.0.1 
+    docker run --rm  --name rspace-dashboard -p9194:9194 -eRSPACE_API_KEY -e RSPACE_URL otter606/rspace-steampipe:0.0.2
 
 And open your browser at http://localhost:9194/local.dashboard.rspace_dashboard
 
@@ -34,7 +34,7 @@ The above command will remove the Docker container when you stop it using Ctrl-C
 
 You can run the container as a long-running process:
 
-    docker run -d  --name rspace-dashboard -p9194:9194 -eRSPACE_API_KEY -eRSPACE_URL otter606/rspace-steampipe:0.0.1
+    docker run -d  --name rspace-dashboard -p9194:9194 -eRSPACE_API_KEY -eRSPACE_URL otter606/rspace-steampipe:0.0.2
 
 and then access the Steampipe query command line to execute arbitrary queries:
 
@@ -71,11 +71,11 @@ You can access the container via
 
 Alternatively, you can pull the dashboard project from Github
 
-    git clone --depth 1 -bv0.0.1 https://github.com/richarda23/steampipe-mod-rspace.git
+    git clone --depth 1 -bv0.0.2 https://github.com/richarda23/steampipe-mod-rspace.git
 
-You can them mount the clone reop inside the Docker container, and edit it with any editor you have installed on your computer. Change the 'src' attribute in the command below to match the location of the cloned repo on your  system.
+You can them mount the cloned repo inside the Docker container, and edit it with any editor you have installed on your computer. Change the 'src' attribute in the command below to match the location of the cloned repo on your  system.
  
-    docker run -d  --name rspace-dashboard -p9194:9194 -eRSPACE_API_KEY -e RSPACE_URL --mount type=bind,src=/absolute/path/to/cloned/gitrepo/steampipe-mod-rspace,dst=/git/mod-rspace otter606/rspace-steampipe:0.0.1
+    docker run -d  --name rspace-dashboard -p9194:9194 -eRSPACE_API_KEY -eRSPACE_URL --mount type=bind,src=/absolute/path/to/cloned/gitrepo/steampipe-mod-rspace,dst=/git/mod-rspace otter606/rspace-steampipe:0.0.2
 
 Please suggest any information you'd like to see in the dashboard. 
 
