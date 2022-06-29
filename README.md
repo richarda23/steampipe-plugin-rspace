@@ -1,6 +1,6 @@
 Steampipe plugin for [RSpace ELN](https://www.researchspace.com)
 
-This plugin provides some access to RSpace resources via the activity/ and documents/ API using  [Steampipe](https://steampipe.io). It supports a prototype dashboard that can show various metrics about RSapace activity. It also supports the notions of 'controls' that can
+This plugin provides some access to RSpace resources via the activity/ and documents/ API using  [Steampipe](https://steampipe.io). It supports a prototype dashboard that can show various metrics about RSpace activity. It also supports the notions of 'controls' that can
 provided alerts or warnings about good practices.
 
 A Docker image with embedded RSpace dashboard is available:
