@@ -2,9 +2,11 @@ package rspace
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/iancoleman/strcase"
+	"github.com/stretchr/testify/assert"
 	"github.com/turbot/go-kit/helpers"
 )
 
@@ -15,6 +17,12 @@ type Base struct {
 type Child struct {
 	Base
 	C, D string
+}
+
+func TestDateSplit(t *testing.T) {
+	iso8601 := "2019-02-12T19:51:38.000Z"
+	parts := strings.Split(iso8601, "T")
+	assert.Equal(t, "2019-02-12", parts[0])
 }
 
 func TestTransformFromInterface(t *testing.T) {

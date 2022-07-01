@@ -12,7 +12,8 @@ import (
 )
 
 type SPDocInfo struct {
-	GlobalId, Name, OwnerUsername, Tags string
+	GlobalId, Name, Created, LastModified, OwnerUsername, Tags string
+	Signed                                                     bool
 }
 
 func tableRSpaceDocumentListKeyColumns() []*plugin.KeyColumn {
@@ -34,8 +35,13 @@ func tableRSpaceDocument() *plugin.Table {
 		Columns: []*plugin.Column{
 			{Name: "global_id", Transform: transform.FromCamel(), Type: proto.ColumnType_STRING, Description: "Global Id"},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of Document"},
+			{Name: "created", Transform: transform.FromCamel(), Type: proto.ColumnType_TIMESTAMP,
+				Description: "Creation time of document"},
+			{Name: "last_modified", Transform: transform.FromCamel(),
+				Type: proto.ColumnType_TIMESTAMP, Description: "Last modified time of document"},
 			{Name: "owner_username", Transform: transform.FromCamel(), Type: proto.ColumnType_STRING, Description: "Full name of owner"},
 			{Name: "tags", Type: proto.ColumnType_STRING, Description: "Comma separated list of tags"},
+			{Name: "signed", Type: proto.ColumnType_BOOL, Description: "Whether the document is signed or not"},
 		},
 	}
 }
@@ -64,7 +70,8 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 			logger.Warn(fmt.Sprintf("id=%s and name=%s", t.GlobalId, t.Name))
 		}
 		for _, t := range docList.Documents {
-			mappedDoc := SPDocInfo{t.GlobalId, t.Name, t.UserInfo.Username, t.Tags}
+			mappedDoc := SPDocInfo{t.GlobalId, t.Name, t.Created,
+				t.LastModified, t.UserInfo.Username, t.Tags, t.Signed}
 			d.StreamListItem(ctx, mappedDoc)
 		}
 		links := docList.Links
