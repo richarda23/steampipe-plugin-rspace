@@ -44,3 +44,16 @@ where
   name = 'Untitled document'
 ```
 
+### Get a single document by its global ID
+
+```sql
+select
+  name,
+  global_id,
+  tags,
+  owner_username 
+from
+  rspace_document 
+where
+  global_id = 'SD12345'
+```
