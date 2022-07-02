@@ -25,6 +25,26 @@ func TestDateSplit(t *testing.T) {
 	assert.Equal(t, "2019-02-12", parts[0])
 }
 
+func TestIsGlobalId(t *testing.T) {
+	assert.True(t, isGlobalId("SD12345"))
+	assert.False(t, isGlobalId("12345"))
+	assert.False(t, isGlobalId(""))
+}
+
+func TestGetGlobalId(t *testing.T) {
+	id, e := getIdFromGlobalId("SD12345")
+	assert.Equal(t, 12345, id)
+	assert.Nil(t, e)
+
+	id, e = getIdFromGlobalId("12345")
+	assert.Equal(t, 12345, id)
+	assert.Nil(t, e)
+
+	id, e = getIdFromGlobalId("abcdef")
+	assert.Equal(t, 0, id)
+	assert.NotNil(t, e)
+
+}
 func TestTransformFromInterface(t *testing.T) {
 	child := Child{Base{"a", "b"}, "c", "d"}
 	val, ok := helpers.GetFieldValueFromInterface(child, "A")

@@ -32,6 +32,10 @@ func tableRSpaceDocument() *plugin.Table {
 			Hydrate:    listDocument,
 			KeyColumns: tableRSpaceDocumentListKeyColumns(),
 		},
+		Get: &plugin.GetConfig{
+			Hydrate:    getDocument,
+			KeyColumns: plugin.SingleColumn("global_id"),
+		},
 		Columns: []*plugin.Column{
 			{Name: "global_id", Transform: transform.FromCamel(), Type: proto.ColumnType_STRING, Description: "Global Id"},
 			{Name: "name", Type: proto.ColumnType_STRING, Description: "Name of Document"},
@@ -44,6 +48,35 @@ func tableRSpaceDocument() *plugin.Table {
 			{Name: "signed", Type: proto.ColumnType_BOOL, Description: "Whether the document is signed or not"},
 		},
 	}
+}
+
+// getDocument retrieves a single document by its global ID
+func getDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
+	logger := plugin.Logger(ctx)
+	conn, err := connect(ctx)
+	if err != nil {
+		logger.Warn("couldn't connect to RSpace")
+		return nil, err
+	}
+	idStr := d.KeyColumnQuals["global_id"].GetStringValue()
+	id, err := getIdFromGlobalId(idStr)
+	if err != nil {
+		return nil, err
+	}
+	logger.Debug("Parsed id as ", "id", id)
+
+	doc, err := conn.DocumentById(id)
+
+	if err != nil {
+		return nil, err
+	}
+	logger.Debug("retrieved doc as ", "id", doc.Id)
+
+	mappedDoc := SPDocInfo{doc.GlobalId, doc.Name, doc.Created,
+		doc.LastModified, doc.UserInfo.Username, doc.Tags, doc.Signed}
+
+	return mappedDoc, nil
+
 }
 
 func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) (interface{}, error) {
@@ -87,7 +120,6 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 func buildQuery(d *plugin.QueryData) *rspace.SearchQuery {
 	builder := &rspace.SearchQueryBuilder{}
 	equalQuals := d.KeyColumnQuals
-
 	if equalQuals["name"] != nil {
 		val := equalQuals["name"].GetStringValue()
 		builder.AddTerm(val, rspace.NAME)
@@ -100,6 +132,7 @@ func buildQuery(d *plugin.QueryData) *rspace.SearchQuery {
 		val := equalQuals["owner_username"].GetStringValue()
 		builder.AddTerm(val, rspace.OWNER)
 	}
+	builder.AddTerm("x", rspace.CREATED)
 	q := builder.Build()
 	return q
 }
