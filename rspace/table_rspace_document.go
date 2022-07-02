@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/hashicorp/go-hclog"
 	"github.com/richarda23/rspace-client-go/rspace"
 	"github.com/turbot/steampipe-plugin-sdk/grpc/proto"
 	"github.com/turbot/steampipe-plugin-sdk/plugin"
@@ -21,6 +22,8 @@ func tableRSpaceDocumentListKeyColumns() []*plugin.KeyColumn {
 		{Name: "name", Require: plugin.Optional},
 		{Name: "tags", Require: plugin.Optional},
 		{Name: "owner_username", Require: plugin.Optional},
+		{Name: "created", Require: plugin.Optional, Operators: []string{">", ">=", "<", "<="}},
+		{Name: "last_modified", Require: plugin.Optional, Operators: []string{">", ">=", "<", "<="}},
 	}
 }
 
@@ -86,7 +89,7 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		logger.Warn("couldn't connect to RSpace")
 		return nil, err
 	}
-	q := buildQuery(d)
+	q := buildQuery(d, logger)
 	logger.Warn("", "query", q)
 	cfg := rspace.NewRecordListingConfig()
 	cfg.PageSize = 100
@@ -118,7 +121,7 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 	return nil, nil
 }
 
-func buildQuery(d *plugin.QueryData) *rspace.SearchQuery {
+func buildQuery(d *plugin.QueryData, log hclog.Logger) *rspace.SearchQuery {
 	builder := &rspace.SearchQueryBuilder{}
 	equalQuals := d.KeyColumnQuals
 	if equalQuals["name"] != nil {
@@ -132,6 +135,17 @@ func buildQuery(d *plugin.QueryData) *rspace.SearchQuery {
 	if equalQuals["owner_username"] != nil {
 		val := equalQuals["owner_username"].GetStringValue()
 		builder.AddTerm(val, rspace.OWNER)
+	}
+	quals := d.Quals
+	if quals["created"] != nil {
+		dateQ := getDateQueryFromQual("created", quals)
+		log.Warn("Created date query:", "q", dateQ.String())
+		builder.AddTerm(dateQ.String(), rspace.CREATED)
+	}
+	if quals["last_modified"] != nil {
+		dateQ := getDateQueryFromQual("last_modified", quals)
+		log.Warn("last_modified date query:", "q", dateQ.String())
+		builder.AddTerm(dateQ.String(), rspace.LAST_MODIFIED)
 	}
 	q := builder.Build()
 	return q
