@@ -87,6 +87,7 @@ func listDocument(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateDat
 		return nil, err
 	}
 	q := buildQuery(d)
+	logger.Warn("", "query", q)
 	cfg := rspace.NewRecordListingConfig()
 	cfg.PageSize = 100
 	limit := getLimit(d)
@@ -132,7 +133,6 @@ func buildQuery(d *plugin.QueryData) *rspace.SearchQuery {
 		val := equalQuals["owner_username"].GetStringValue()
 		builder.AddTerm(val, rspace.OWNER)
 	}
-	builder.AddTerm("x", rspace.CREATED)
 	q := builder.Build()
 	return q
 }
