@@ -44,6 +44,21 @@ where
   name = 'Untitled document'
 ```
 
+### List documents modified in last 28 days
+
+```sql
+select
+  name,
+  global_id,
+  tags,
+  owner_username 
+from
+  rspace_document 
+where
+  last_modified = now() - interval '28d'
+```
+
+
 ### Get a single document by its global ID
 
 ```sql

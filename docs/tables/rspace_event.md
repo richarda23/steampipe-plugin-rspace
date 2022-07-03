@@ -55,5 +55,17 @@ where
 and
   action = 'CREATE'
 limit 10
-  ```
+```
+
+### List identifers of all resources accessed in last 28d
+
+```sql
+select
+  payload ->> 'id'
+from
+  rspace_event 
+where
+  timestamp > now() - interval '28d'
+limit 10
+```
 
