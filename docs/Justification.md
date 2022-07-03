@@ -51,4 +51,4 @@ In the field of cloud services, there are many sophisticated compliance standard
 
 The ELN field is  small and niche, and not all ELNs have well-written APIs exposing their data. It may be difficult to extract similar information from all ELNs.
 
-ELN companies are generally quite small and operating in a highly competitive market, with little or no collaboration between each company. While industry standards might  benefit the ELN market (e.g. enabling interoperability that would reassure customers they won't get locked into  a single provider), there seems little appetite for such collabortion at present.
+ELN companies are generally quite small and operating in a highly competitive market, with little or no collaboration between each company. While industry standards might  benefit the ELN market (e.g. enabling interoperability that would reassure customers they won't get locked into  a single provider), there seems little appetite for such collaboration at present.
