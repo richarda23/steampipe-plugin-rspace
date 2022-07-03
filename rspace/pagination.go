@@ -1,7 +1,6 @@
 package rspace
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/richarda23/rspace-client-go/rspace"
@@ -22,7 +21,7 @@ func listingHasNextPage(links []rspace.Link) bool {
 func calculatePageSizes(lim int, HARD_LIMIT int, maxPageSize int) ([]int, error) {
 
 	if lim < 1 || HARD_LIMIT < 1 || maxPageSize < 1 {
-		return nil, errors.New(fmt.Sprintf("Invalid arguments: must be positive integers > 1 - %d, %d ,%d", lim, HARD_LIMIT, maxPageSize))
+		return nil, fmt.Errorf("invalid arguments: must be positive integers > 1 - %d, %d ,%d", lim, HARD_LIMIT, maxPageSize)
 	}
 	if lim < maxPageSize {
 		return []int{int(lim)}, nil
