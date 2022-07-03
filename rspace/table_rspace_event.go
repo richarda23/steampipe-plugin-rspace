@@ -48,11 +48,11 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 		logger.Warn("couldn't connect to RSpace")
 		return nil, err
 	}
-	q, err := buildDocQuery(d)
+	q, err := buildActivityQuery(d)
+	logger.Warn("apiquery", "apiquery", q)
 	if err != nil {
 		return nil, err
 	}
-	logger.Warn("", "apiquery", q)
 
 	cfg := rspace.NewRecordListingConfig()
 
@@ -85,7 +85,7 @@ func listEvent(ctx context.Context, d *plugin.QueryData, _ *plugin.HydrateData) 
 	return nil, nil
 }
 
-func buildDocQuery(d *plugin.QueryData) (*rspace.ActivityQuery, error) {
+func buildActivityQuery(d *plugin.QueryData) (*rspace.ActivityQuery, error) {
 	builder := rspace.ActivityQueryBuilder{}
 	equalQuals := d.KeyColumnQuals
 	if equalQuals["domain"] != nil {
@@ -95,6 +95,16 @@ func buildDocQuery(d *plugin.QueryData) (*rspace.ActivityQuery, error) {
 	if equalQuals["action"] != nil {
 		val := equalQuals["action"].GetStringValue()
 		builder.Action(val)
+	}
+	quals := d.Quals
+	if quals["timestamp"] != nil {
+		dq := getDateQueryFromQual("timestamp", quals)
+		if !dq.from.IsZero() {
+			builder.DateFrom(dq.from)
+		}
+		if !dq.to.IsZero() {
+			builder.DateTo(dq.to)
+		}
 	}
 
 	q, err := builder.Build()
