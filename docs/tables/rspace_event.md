@@ -41,7 +41,7 @@ from
   rspace_event
 ```
 
-### List 'create document' actions
+### List 'create record' actions
 
 ```sql
 select
@@ -57,7 +57,7 @@ and
 limit 10
 ```
 
-### List identifers of all resources accessed in last 28d
+### List identifers of all resources accessed in last 28 days
 
 ```sql
 select
