@@ -14,6 +14,7 @@ func Plugin(ctx context.Context) *plugin.Plugin {
 		TableMap: map[string]*plugin.Table{
 			"rspace_event":    tableRSpaceEvent(),
 			"rspace_document": tableRSpaceDocument(),
+			"rspace_file":     tableRSpaceFile(),
 		},
 	}
 	return p
